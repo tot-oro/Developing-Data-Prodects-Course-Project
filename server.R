@@ -3,7 +3,7 @@ library(dplyr)
 require(rCharts)
 library(ggplot2)
 
-setwd("/Users/vivi/Dropbox/DataScience/Developing-Data-Products/Developing-Data-Prodects-Course-Project")
+#setwd("/Users/vivi/Dropbox/DataScience/Developing-Data-Products/Developing-Data-Prodects-Course-Project")
 
 ## Load the iMDB movie data 
 data("movies")
@@ -12,7 +12,7 @@ data("movies")
 summary(movies)
 table(movies$year)
 
-# Restrict analysis to 1985-2004 data 
+# Restrict analysis to 1985-2004 data and only keep variables with interest
 MData = movies %>%
         filter(year<=2004, year>=1985) %>%
         select(1:5, 17:24)
@@ -44,22 +44,33 @@ groupByYear = function(dt, minYear, maxYear, genres, mprate) {
         return(result)
 }
 
-groupByYearAgg = function(dt, minYear, maxYear, genres, mprate) {
-        dt = groupByYear(dt,minYear, maxYear, genres, mprate)
+groupByYearAgg = function(dt) {
+        #dt = groupByYear(dt,minYear, maxYear, genres, mprate)
         result = dt %>%
                 group_by(year) %>%
-                summarise(Total = n()) %>%
+                summarise(Total = n(), Action = sum(Genre == "Action"),
+                          Animation = sum(Genre == "Animation"),
+                          Comedy = sum(Genre == "Comedy"),
+                          Drama = sum(Genre == "Drama"),
+                          Documentary = sum(Genre == "Documentary"),
+                          Roman = sum(Genre == "Romance"),
+                          Short = sum(Genre == "Short"),
+                          NC.17 = sum(mpaa == "NC-17"),
+                          PG = sum(mpaa == "PG"),
+                          PG.13 = sum(mpaa == "PG-13"),
+                          R = sum(mpaa == "R"),
+                          UNRATED = sum(mpaa == "")) %>%
                 arrange(year)
         return(result)
 }
 
 groupByYearPlot = function(dt) {
-        totalByYear = nPlot(Total ~ year, data = dt, type = "multiBarChart",
-                            width = 650)
+        totalByYear = nPlot(Total ~ year, data = dt, type = "multiBarChart")
+        totalByYear$addParams(dom = 'totalByYear')
         totalByYear$chart(margin = list(left = 100))
         totalByYear$yAxis(axisLabel = "Number of Movies")
         totalByYear$xAxis(axisLabel = "Year")
-        totalByYear
+        return(totalByYear)
 }
 
 shinyServer(
@@ -111,13 +122,13 @@ shinyServer(
                 
 
                 dataAgg = reactive({
-                        groupByYearAgg(MData2,input$timeline[1], input$timeline[2],
-                                       input$genres, input$mprate)
+                        groupByYearAgg(FinalData())
                 })
                 
-                output$totalByYear = renderChart({
-                        plot(year, Total, dataAgg())
-                })
+                
+                #output$totalByYear =  renderChart({
+                 #       groupByYearPlot(dataAgg())
+                #})
                 
                 output$dataAgg = renderDataTable({
                         dataAgg()

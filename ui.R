@@ -44,7 +44,7 @@ shinyUI(
                 
                 mainPanel(
                         h4('Total Number of Movies Released'),
-                        #plotOutput("totalByYear"),
+                        plotOutput("totalByYear"),
                         #showOutput("totalByYear", "nvd3"),
                         #htmlOutput("totalByYear"),
                         #chartOutput("totalByYear", lib = NULL),

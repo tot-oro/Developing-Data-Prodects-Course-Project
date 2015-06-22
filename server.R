@@ -126,9 +126,9 @@ shinyServer(
                 })
                 
                 
-                #output$totalByYear =  renderChart({
-                 #       groupByYearPlot(dataAgg())
-                #})
+                output$totalByYear =  renderPlot({
+                        totalByYear = with(FinalData(), ggplot(year, Genre, type="bar"))
+                })
                 
                 output$dataAgg = renderDataTable({
                         dataAgg()
